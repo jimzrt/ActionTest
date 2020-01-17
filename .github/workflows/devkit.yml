@@ -15,10 +15,9 @@ jobs:
       uses: actions/checkout@v1
     - name: Install dependencies
       run: |
-        sudo apt-get install build-essential
         wget https://github.com/devkitPro/pacman/releases/latest/download/devkitpro-pacman.deb
         sudo dpkg -i devkitpro-pacman.deb
-        sudo dkp-pacman -S devkitARM --noconfirm
+        sudo dkp-pacman -S devkit-env devkitARM --noconfirm
     - name: Make
       run: |
         source /etc/profile.d/devkit-env.sh
