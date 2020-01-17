@@ -1,6 +1,9 @@
 name: CI
 
-on: [push]
+on:
+  push:
+   tags:
+    - 'v*' # Push events to matching v*, i.e. v1.0, v20.15.10
 
 jobs:
   build:
@@ -15,9 +18,27 @@ jobs:
         sudo apt install build-essential
         wget https://github.com/devkitPro/pacman/releases/latest/download/devkitpro-pacman.deb
         sudo dpkg -i devkitpro-pacman.deb
-        sudo dkp-pacman -Sy switch-dev --noconfirm
         sudo dkp-pacman -S devkitARM --noconfirm
     - name: Make
       run: |
         source /etc/profile.d/devkit-env.sh
         make -j4
+    - name: Create Release
+      id: create_release
+      uses: actions/create-release@v1.0.0
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ github.ref }}
+        release_name: Release ${{ github.ref }}
+        draft: false
+        prerelease: false
+    - name: Upload Release Asset
+      uses: actions/upload-release-asset@v1.0.1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps 
+        asset_path: ./output/Incognito_RCM.bin
+        asset_name: Incognito_RCM.bin
+        asset_content_type: application/octet-stream
